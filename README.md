@@ -4,4 +4,4 @@
 [![Build Status](https://travis-ci.org/lifeomic/dynogen.svg?branch=master)](https://travis-ci.org/lifeomic/dynogen)
 [![Greenkeeper badge](https://badges.greenkeeper.io/lifeomic/dynogen.svg)](https://greenkeeper.io/)
 
-Tool for generating a type safe DynamoDB client base on JSON Schema.
+Tool for generating a type safe DynamoDB client based on JSON Schema.
