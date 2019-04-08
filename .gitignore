@@ -1,0 +1,6 @@
+/node_modules/
+/coverage/
+/dist/
+/example/node_modules/
+/.vscode/
+yarn-error.log
