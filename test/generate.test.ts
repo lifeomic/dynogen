@@ -5,7 +5,6 @@ import { promisify } from 'util';
 import rimraf = require('rimraf');
 
 import { generate } from '../src';
-import { readdir } from 'fs-extra';
 import { createMockMapperConfig } from './helpers/mapper';
 import { createMockItemConfig } from './helpers/item';
 
@@ -13,7 +12,7 @@ const rimrafAsync = promisify(rimraf);
 
 async function mkdtemp(prefix: string): Promise<[string, () => Promise<void>]> {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
-  return [dir, async () => await rimrafAsync(dir)];
+  return [dir, async () => rimrafAsync(dir)];
 }
 
 test('Generates nothing', async () => {
@@ -21,7 +20,7 @@ test('Generates nothing', async () => {
   try {
     await generate({ mappers: {} });
 
-    const files = await readdir(dir);
+    const files = await fs.readdir(dir);
     expect(files.length).toEqual(0);
   } finally {
     await cleanUp();
@@ -42,7 +41,7 @@ test('Generate generates files', async () => {
       }
     });
 
-    const files = await readdir(dir);
+    const files = await fs.readdir(dir);
     expect(files).toEqual(['Item.ts', 'Mapper.ts']);
   } finally {
     await cleanUp();
