@@ -1,6 +1,6 @@
 {
   "name": "dynogen",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "Tool for generating a type safe DynamoDB client based on JSON Schema.",
   "author": "LifeOmic <development@lifeomic.com>",
   "license": "MIT",
