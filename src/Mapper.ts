@@ -29,14 +29,21 @@ interface LocalSecondaryIndex extends SecondaryIndex {
   rangeKey: string;
 }
 
-interface TableSchema {
+interface TableSchemaConfig {
   hashKey: string;
   rangeKey?: string;
   globalSecondaryIndexes?: GlobalSecondaryIndex[];
   localSecondaryIndexes?: LocalSecondaryIndex[];
 }
 
-export interface MapperMetadata extends TableSchema {
+interface TableSchema {
+  hashKey: string;
+  rangeKey?: string;
+  globalSecondaryIndexes: GlobalSecondaryIndex[];
+  localSecondaryIndexes: LocalSecondaryIndex[];
+}
+
+export interface MapperMetadata extends TableSchemaConfig {
   tableName: string;
 }
 
@@ -200,39 +207,27 @@ ${this.generateDefaultProviderImports()}`;
 
   get indexKeys(): string[] {
     return [
-      this.tableSchema.globalSecondaryIndexes,
-      this.tableSchema.localSecondaryIndexes
-    ]
-      .reduce<{ hashKey?: string; rangeKey?: string }[]>(
-        (acc, curr) => {
-          return curr ? [...acc, ...curr] : acc;
-        },
-        [{ hashKey: this.hashKey, rangeKey: this.rangeKey }]
-      )
-      .reduce<string[]>(
-        (acc, curr: { hashKey?: string; rangeKey?: string }) => {
-          if (curr.hashKey) {
-            acc.push(curr.hashKey);
-          }
-          if (curr.rangeKey) {
-            acc.push(curr.rangeKey);
-          }
-          return acc;
-        },
-        []
-      )
-      .filter((value, index, arr) => arr.indexOf(value) === index);
+      ...this.tableSchema.globalSecondaryIndexes,
+      ...this.tableSchema.localSecondaryIndexes,
+      { hashKey: this.hashKey, rangeKey: this.rangeKey }
+    ].reduce<string[]>((acc, curr: { hashKey?: string; rangeKey?: string }) => {
+      if (curr.hashKey) {
+        acc.push(curr.hashKey);
+      }
+      if (curr.rangeKey) {
+        acc.push(curr.rangeKey);
+      }
+      return acc;
+    }, []);
   }
 
   generateIndexNameType(): string {
-    const keys = [
-      this.tableSchema.globalSecondaryIndexes,
-      this.tableSchema.localSecondaryIndexes
-    ].reduce<{ hashKey?: string; rangeKey?: string }[]>((acc, curr) => {
-      return curr ? [...acc, ...curr] : acc;
-    }, []);
-    if (!keys.length) return `type IndexName = never;`;
-    return `type IndexName = ${keys.map((key) => `"${key}"`).join(' | ')};`;
+    const names = [
+      ...this.tableSchema.globalSecondaryIndexes,
+      ...this.tableSchema.localSecondaryIndexes
+    ].map((index: SecondaryIndex) => index.name);
+    if (!names.length) return `type IndexName = never;`;
+    return `type IndexName = ${names.map((name) => `"${name}"`).join(' | ')};`;
   }
 
   async generate(context: Context): Promise<void> {
