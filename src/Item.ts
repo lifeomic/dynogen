@@ -66,10 +66,11 @@ export class Item {
 
   resolveKeyType(key: string): JSONSchema4Type {
     const property = this.schema.properties[key];
-    if (!property)
+    if (!property) {
       throw new Error(
         `property "${key}" does not exist on schema "${this.typeName}"`
       );
+    }
 
     return property.type;
   }
@@ -94,12 +95,7 @@ export class Item {
 
     const generatedProperties = Object.entries(this.schema.properties).reduce(
       (acc, [key, schema]) =>
-        this.generatedKeys.includes(key)
-          ? {
-              ...acc,
-              [key]: schema
-            }
-          : acc,
+        this.generatedKeys.includes(key) ? { ...acc, [key]: schema } : acc,
       {}
     );
 

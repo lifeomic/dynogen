@@ -9,7 +9,16 @@
   "jsnext:main": "./dist/esnext/src/",
   "types": "./dist/src/index.d.ts",
   "scripts": {
-    "test": "jest --coverage"
+    "compile-src-cjs": "tsc --declaration --declarationDir ./dist -p tsconfig-src-cjs.json",
+    "compile-src-es6": "tsc -p tsconfig-src-es6.json",
+    "compile-src-esnext": "tsc -p tsconfig-src-esnext.json",
+    "precompile-src": "rm -rf ./dist",
+    "compile-src": "yarn compile-src-cjs && yarn compile-src-es6 && yarn compile-src-esnext",
+    "lint": "tslint --format codeFrame --project tsconfig.json 'src/**/*.ts' 'test/**/*.ts'",
+    "pretest": "yarn lint",
+    "test": "jest --coverage",
+    "prebuild": "yarn test",
+    "build": "yarn compile-src"
   },
   "repository": {
     "type": "git",
@@ -39,6 +48,8 @@
     "rimraf": "^2.6.3",
     "ts-jest": "^24.0.1",
     "ts-node": "^8.0.3",
+    "tslint": "^5.15.0",
+    "tslint-config-semistandard": "^7.0.0",
     "typescript": "^3.4.1",
     "uuid": "^3.3.2"
   },
