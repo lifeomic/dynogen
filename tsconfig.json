@@ -16,7 +16,8 @@
     "target": "ESNext",
     "pretty": true,
     "inlineSourceMap": false,
-    "inlineSources": false
+    "inlineSources": false,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts", "typings/**/*.d.ts"]
 }

@@ -1,4 +1,4 @@
-import { renderValueToString } from '../src/AST';
+import { renderValueToString } from '../src/ast';
 
 test('renderToString can render simple object', () => {
   const result = renderValueToString({

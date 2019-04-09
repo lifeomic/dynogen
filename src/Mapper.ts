@@ -90,7 +90,7 @@ export class Mapper {
       throw new Error('Union types are not currently supported as index keys');
     }
 
-    const schemaType = <JSONSchema4TypeName>schemaTypeOrTypes;
+    const schemaType = schemaTypeOrTypes as JSONSchema4TypeName;
     return String(dynamoDBIndexableScalarTypeMap.get(schemaType));
   }
 
@@ -141,12 +141,7 @@ ${this.generateDefaultProviderImports()}`;
     const { indexKeys } = this;
     const indexProperties = Object.entries(this.item.schema.properties).reduce(
       (acc, [key, schema]) =>
-        indexKeys.includes(key)
-          ? {
-              ...acc,
-              [key]: schema
-            }
-          : acc,
+        indexKeys.includes(key) ? { ...acc, [key]: schema } : acc,
       {}
     );
 
