@@ -1,12 +1,16 @@
+import * as path from 'path';
+import * as ejs from 'ejs';
+import { JSONSchema4TypeName } from 'json-schema';
+import { compile } from 'json-schema-to-typescript';
+
 import { GeneratedFileConfig } from './GeneratedFile';
 import { Item, ItemConfig, DEFAULT_JSON_TO_TS_OPTIONS } from './Item';
 import { renderValueToString, getIndentPrefix } from './ast';
-import { JSONSchema4TypeName } from 'json-schema';
 import { resolvePath } from './util';
-import { DEFAULT_MAPPER_IMPORTS } from './constants';
-import { compile } from 'json-schema-to-typescript';
 import { Context } from './Context';
 import { File } from './File';
+
+const MAPPER_TEMPLATE_PATH = path.join(__dirname, 'templates', 'Mapper.ts.ejs');
 
 type DynamoDBIndexableScalarType = 'S' | 'N';
 const dynamoDBIndexableScalarTypeMap = new Map<
@@ -49,6 +53,23 @@ export interface MapperMetadata extends TableSchemaConfig {
 
 export interface MapperConfig extends GeneratedFileConfig, MapperMetadata {
   item: ItemConfig;
+}
+
+export interface MapperRenderProps {
+  name: string;
+  tableSchema: string;
+  generatedPartialMappings: string;
+  itemSchema: string;
+  partialItemSchema: string;
+  keyTypeDeclaration: string;
+  keyTypeName: string;
+  itemResolvePath: string;
+  defaultProviderImports: string;
+  indexNameDeclaration: string;
+  item: {
+    typeName: string;
+    uninitializedTypename: string;
+  };
 }
 
 export class Mapper {
@@ -94,20 +115,7 @@ export class Mapper {
     return String(dynamoDBIndexableScalarTypeMap.get(schemaType));
   }
 
-  private generateImports(): string {
-    return `${DEFAULT_MAPPER_IMPORTS}
-import {
-  ${this.item.typeName},
-  ${this.item.uninitializedTypeName},
-  ${this.item.generatedPartialTypeName},
-} from '${resolvePath(
-      this.generatedFileConfig.outPath,
-      this.item.generatedFileConfig.outPath
-    )}';
-${this.generateDefaultProviderImports()}`;
-  }
-
-  private generateDefaultProviderImports(): string {
+  private renderDefaultProviderImports(): string {
     return (
       Object.values(this.item.defaultProviders)
         .map((defaultProvider) => {
@@ -125,7 +133,7 @@ ${this.generateDefaultProviderImports()}`;
     );
   }
 
-  private generateGeneratedPartialMappings(): string {
+  private renderGeneratedPartialMappings(): string {
     return (
       Object.entries(this.item.defaultProviders)
         .map(([name, defaultProvider]) => {
@@ -137,7 +145,7 @@ ${this.generateDefaultProviderImports()}`;
     );
   }
 
-  private generateKeyType(): Promise<string> {
+  private renderKeyType(): Promise<string> {
     const { indexKeys } = this;
     const indexProperties = Object.entries(this.item.schema.properties).reduce(
       (acc, [key, schema]) =>
@@ -156,7 +164,7 @@ ${this.generateDefaultProviderImports()}`;
     );
   }
 
-  private generateTableSchema(): string {
+  private renderTableSchema(): string {
     const TableName = this.tableName;
     const KeySchema = [
       {
@@ -200,7 +208,14 @@ ${this.generateDefaultProviderImports()}`;
     );
   }
 
-  get indexKeys(): string[] {
+  private get itemResolvePath(): string {
+    return resolvePath(
+      this.generatedFileConfig.outPath,
+      this.item.generatedFileConfig.outPath
+    );
+  }
+
+  private get indexKeys(): string[] {
     return [
       ...this.tableSchema.globalSecondaryIndexes,
       ...this.tableSchema.localSecondaryIndexes,
@@ -216,7 +231,7 @@ ${this.generateDefaultProviderImports()}`;
     }, []);
   }
 
-  generateIndexNameType(): string {
+  private renderIndexNameType(): string {
     const names = [
       ...this.tableSchema.globalSecondaryIndexes,
       ...this.tableSchema.localSecondaryIndexes
@@ -225,154 +240,45 @@ ${this.generateDefaultProviderImports()}`;
     return `type IndexName = ${names.map((name) => `"${name}"`).join(' | ')};`;
   }
 
+  private renderItemSchemaValue() {
+    return renderValueToString(this.item.schema, {
+      noPrefixIndent: true,
+      indentLevelOffset: 1
+    });
+  }
+
+  private renderPartialItemSchemaValue() {
+    return renderValueToString(
+      {
+        ...this.item.schema,
+        required: []
+      },
+      { noPrefixIndent: true, indentLevelOffset: 1 }
+    );
+  }
+
+  private render(props: MapperRenderProps): Promise<string> {
+    return ejs.renderFile(MAPPER_TEMPLATE_PATH, props);
+  }
+
   async generate(context: Context): Promise<void> {
     await this.item.generate(context);
-    const content = `${this.generateImports()}
-${this.generateIndexNameType()}
-
-${await this.generateKeyType()}
-const ajv = new Ajv({
-  allErrors: true
-});
-
-export class ${this.name} {
-  constructor(private readonly client: DocumentClient) {}
-
-  static readonly tableSchema = ${this.generateTableSchema()};
-
-  static get tableName(): string {
-    return ${this.name}.tableSchema.TableName;
-  }
-
-  static initialize(item: ${this.item.uninitializedTypeName}): ${
-      this.item.typeName
-    } {
-    return {
-${this.generateGeneratedPartialMappings()}...item
-    }
-  }
-
-  private static readonly validator = ajv.compile(${renderValueToString(
-    this.item.schema,
-    {
-      noPrefixIndent: true,
-      indentLevelOffset: 1
-    }
-  )})
-
-  private static readonly partialValidator = ajv.compile(${renderValueToString(
-    {
-      ...this.item.schema,
-      required: []
-    },
-    {
-      noPrefixIndent: true,
-      indentLevelOffset: 1
-    }
-  )})
-
-  static async validate(item: Readonly<${this.item.typeName}>): Promise<void> {
-    if (!await ${this.name}.validator(item)) throw new Error(ajv.errorsText());
-  }
-
-  static async partialValidate(item: Readonly<Partial<${
-    this.item.typeName
-  }>>): Promise<void> {
-    if (!await ${
-      this.name
-    }.partialValidator(item)) throw new Error(ajv.errorsText());
-  }
-
-  async put(toPut: Readonly<${this.item.uninitializedTypeName}>): Promise<${
-      this.item.typeName
-    }> {
-    const item = <${this.item.typeName}>{
-      ...toPut,
-      ...${this.name}.initialize(toPut)
-    };
-
-    await ${this.name}.validate(item);
-    await this.client
-      .put({
-        TableName: ${this.name}.tableName,
-        Item: item
-      })
-      .promise();
-
-    // The input item is returned because getting new fields on PutItem
-    // operation is impossible. DynamoDB only supports 'OLD_VALUES' and
-    // 'NONE' for this operation. This would otherwise require a
-    // subsequent query.
-    return item;
-  }
-
-  async get(key: Readonly<${this.keyTypeName}>): Promise<${
-      this.item.typeName
-    }> {
-    const { Item: item } = await this.client
-      .get({
-        TableName: ${this.name}.tableName,
-        Key: key
-      })
-      .promise();
-
-    if (!item) {
-      throw new Error('${this.item.typeName} not found');
-    }
-
-    return <${this.item.typeName}>item;
-  }
-
-  async delete(key: Readonly<${this.keyTypeName}>): Promise<void> {
-    await this.client
-      .delete({
-        TableName: ${this.name}.tableName,
-        Key: key
-      })
-      .promise();
-  }
-
-  async query(): Promise<${this.item.typeName}[]> {
-    const result = await this.client
-      .query({
-        TableName: ${this.name}.tableName
-      })
-      .promise();
-
-    return <${this.item.typeName}[]>result.Items;
-  }
-
-  async update(
-    key: Readonly<${this.keyTypeName}>,
-    patch: Readonly<Partial<${this.item.typeName}>>
-  ): Promise<${this.item.typeName}> {
-    await ${this.name}.partialValidate(patch);
-    const attributeUpdates = Object.entries(patch).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: {
-          Value: value,
-          Action: "PUT"
-        }
-      }),
-      {}
-    );
-
-    const { Attributes: old } = await this.client
-      .update({
-        TableName: ${this.name}.tableName,
-        Key: key,
-        AttributeUpdates: attributeUpdates,
-        ReturnValues: "ALL_OLD"
-      })
-      .promise();
-
-    return {
-      ...(<${this.item.typeName}>old),
-      ...patch
-    };
-  }
-}`;
+    const content = await this.render({
+      name: this.name,
+      itemResolvePath: this.itemResolvePath,
+      tableSchema: this.renderTableSchema(),
+      generatedPartialMappings: this.renderGeneratedPartialMappings(),
+      itemSchema: this.renderItemSchemaValue(),
+      partialItemSchema: this.renderPartialItemSchemaValue(),
+      keyTypeDeclaration: await this.renderKeyType(),
+      defaultProviderImports: this.renderDefaultProviderImports(),
+      indexNameDeclaration: this.renderIndexNameType(),
+      keyTypeName: this.keyTypeName,
+      item: {
+        typeName: this.item.typeName,
+        uninitializedTypename: this.item.uninitializedTypeName
+      }
+    });
     context.stageFile(new File(this.generatedFileConfig.outPath, content));
   }
 }

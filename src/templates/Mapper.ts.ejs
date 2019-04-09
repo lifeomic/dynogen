@@ -1,0 +1,131 @@
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import * as Ajv from 'ajv';
+
+import {
+  <%- item.typeName %>,
+  Uninitialized<%- item.typeName %>
+} from '<%- itemResolvePath %>';
+
+<%- defaultProviderImports %>
+
+<%- keyTypeDeclaration %>
+
+<%- indexNameDeclaration %>
+
+const ajv = new Ajv({
+  allErrors: true
+});
+
+export class <%- name %> {
+  constructor(private readonly client: DocumentClient) {}
+
+  static readonly tableSchema = <%- tableSchema %>;
+
+  static get tableName(): string {
+    return <%- name %>.tableSchema.TableName;
+  }
+
+  static initialize(item: Uninitialized<%- item.typeName %>): <%- item.typeName %> {
+    return {
+<%- generatedPartialMappings %>...item
+    };
+  }
+
+  private static readonly validator = ajv.compile(<%- itemSchema %>);
+  
+  private static readonly partialValidator = ajv.compile(<%- partialItemSchema %>);
+
+  static async validate(item: Readonly<<%- item.typeName %>>): Promise<void> {
+    if (!await <%- name %>.validator(item)) throw new Error(ajv.errorsText());
+  }
+
+  static async partialValidate(item: Readonly<Partial<<%- item.typeName %>>>): Promise<void> {
+    if (!await <%- name %>.partialValidator(item)) throw new Error(ajv.errorsText());
+  }
+
+  async put(toPut: Readonly<Uninitialized<%- item.typeName %>>): Promise<<%- item.typeName %>> {
+    const item = {
+      ...toPut,
+      ...<%- name %>.initialize(toPut)
+    } as <%- item.typeName %>;
+
+    await <%- name %>.validate(item);
+    await this.client
+      .put({
+        TableName: <%- name %>.tableName,
+        Item: item
+      })
+      .promise();
+
+    // The input item is returned because getting new fields on PutItem
+    // operation is impossible. DynamoDB only supports 'OLD_VALUES' and
+    // 'NONE' for this operation. This would otherwise require a
+    // subsequent query.
+    return item;
+  }
+
+  async get(key: Readonly<<%- keyTypeName %>>): Promise<<%- item.typeName %>> {
+    const { Item: item } = await this.client
+      .get({
+        TableName: <%- name %>.tableName,
+        Key: key
+      })
+      .promise();
+
+    if (!item) {
+      throw new Error('<%- item.typeName %> not found');
+    }
+
+    return item as <%- item.typeName %>;
+  }
+
+  async delete(key: Readonly<<%- keyTypeName %>>): Promise<void> {
+    await this.client
+      .delete({
+        TableName: <%- name %>.tableName,
+        Key: key
+      })
+      .promise();
+  }
+
+  async query(): Promise<<%- item.typeName %>[]> {
+    const result = await this.client
+      .query({
+        TableName: <%- name %>.tableName
+      })
+      .promise();
+
+    return result.Items as <%- item.typeName %>[];
+  }
+
+  async update(
+    key: Readonly<<%- keyTypeName %>>,
+    patch: Readonly<Partial<<%- item.typeName %>>>
+  ): Promise<<%- item.typeName %>> {
+    await <%- name %>.partialValidate(patch);
+    const attributeUpdates = Object.entries(patch).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: {
+          Value: value,
+          Action: "PUT"
+        }
+      }),
+      {}
+    );
+
+    const { Attributes: old } = await this.client
+      .update({
+        TableName: <%- name %>.tableName,
+        Key: key,
+        AttributeUpdates: attributeUpdates,
+        ReturnValues: "ALL_OLD"
+      })
+      .promise();
+
+    return {
+      ...(old as <%- item.typeName %>),
+      ...patch
+    };
+  }
+}
