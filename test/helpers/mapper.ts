@@ -1,7 +1,7 @@
 import { MapperConfig } from '../../src';
 import { createMockItemConfig } from './item';
 
-const DEFAULT_MOCK_MAPPER_CONFIG = <Readonly<MapperConfig>>{
+const DEFAULT_MOCK_MAPPER_CONFIG: Readonly<MapperConfig> = {
   item: createMockItemConfig(),
   outPath: './Mapper.ts',
   tableName: 'Users',

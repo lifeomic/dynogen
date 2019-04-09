@@ -1,9 +1,10 @@
-import { GeneratedFileConfig } from './GeneratedFile';
+import { JSONSchema4, JSONSchema4Type } from 'json-schema';
 import {
   compile,
   Options as JSONSchemaToTSOptions
 } from 'json-schema-to-typescript';
-import { JSONSchema4, JSONSchema4Type } from 'json-schema';
+
+import { GeneratedFileConfig } from './GeneratedFile';
 import { ModuleBinding, parseModuleBindingString } from './util';
 import { Context } from './Context';
 import { File } from './File';

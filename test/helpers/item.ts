@@ -1,6 +1,6 @@
 import { ItemConfig } from '../../src';
 
-const DEFAULT_MOCK_ITEM_CONFIG = <Readonly<ItemConfig>>{
+const DEFAULT_MOCK_ITEM_CONFIG: Readonly<ItemConfig> = {
   outPath: './User.ts',
   schema: {
     additionalProperties: false,
