@@ -7,7 +7,6 @@ import { GeneratedFileConfig } from './GeneratedFile';
 import { Item, ItemConfig, DEFAULT_JSON_TO_TS_OPTIONS } from './Item';
 import { renderValueToString, getIndentPrefix } from './ast';
 import { resolvePath } from './util';
-import { Context } from './Context';
 import { File } from './File';
 
 const MAPPER_TEMPLATE_PATH = path.join(__dirname, 'templates', 'Mapper.ts.ejs');
@@ -261,8 +260,8 @@ export class Mapper {
     return ejs.renderFile(MAPPER_TEMPLATE_PATH, props);
   }
 
-  async generate(context: Context): Promise<void> {
-    await this.item.generate(context);
+  async generate(): Promise<File[]> {
+    const itemFile = await this.item.generate();
     const content = await this.render({
       name: this.name,
       itemResolvePath: this.itemResolvePath,
@@ -279,6 +278,7 @@ export class Mapper {
         uninitializedTypename: this.item.uninitializedTypeName
       }
     });
-    context.stageFile(new File(this.generatedFileConfig.outPath, content));
+    const mapperFile = new File(this.generatedFileConfig.outPath, content);
+    return [itemFile, mapperFile];
   }
 }

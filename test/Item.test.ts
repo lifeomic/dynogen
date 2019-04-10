@@ -1,5 +1,4 @@
 import { ItemConfig, Item, File } from '../src';
-import { createContext } from '../src/Context';
 import { createMockItemConfig } from './helpers/item';
 
 interface Fixture {
@@ -91,13 +90,9 @@ export interface GeneratedPartialUser {
 
 fixtures.forEach(({ title, config, expected }) => {
   test(title, async () => {
-    const context = createContext();
-    const stageSpy = jest.spyOn(context, 'stageFile');
     const item = new Item(config);
-    await item.generate(context);
-    expect(stageSpy.mock.calls[0][0]).toEqual(
-      new File(config.outPath, expected)
-    );
+    const file = await item.generate();
+    expect(file).toEqual(new File(config.outPath, expected));
   });
 });
 

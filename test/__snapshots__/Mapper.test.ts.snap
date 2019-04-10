@@ -1,7 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Generates simple Mapper 1`] = `
-"/* tslint-ignore */
+Array [
+  File {
+    "content": "/* tslint-ignore */
+
+/**
+ * This file was generated with Dynogen.
+ * DO NOT EDIT!
+ */
+export interface User {
+  id: string;
+  name?: string;
+  login: string;
+}
+
+export type UninitializedUser = User;
+
+export type GeneratedPartialUser = {};",
+    "path": "./User.ts",
+  },
+  File {
+    "content": "/* tslint-ignore */
 
 /**
  * This file was generated with Dynogen.
@@ -192,11 +212,41 @@ export class UserMapper {
       ...patch
     };
   }
-}"
+}",
+    "path": "./Mapper.ts",
+  },
+]
 `;
 
 exports[`Generates simple Mapper 2`] = `
-"/* tslint-ignore */
+Array [
+  File {
+    "content": "/* tslint-ignore */
+
+/**
+ * This file was generated with Dynogen.
+ * DO NOT EDIT!
+ */
+export interface User {
+  id: string;
+  name?: string;
+  login: string;
+}
+
+export interface UninitializedUser {
+  id?: string;
+  name?: string;
+  login: string;
+}
+
+export interface GeneratedPartialUser {
+  id: string;
+  name: string;
+}",
+    "path": "./User.ts",
+  },
+  File {
+    "content": "/* tslint-ignore */
 
 /**
  * This file was generated with Dynogen.
@@ -400,5 +450,8 @@ export class UserMapper {
       ...patch
     };
   }
-}"
+}",
+    "path": "./Mapper.ts",
+  },
+]
 `;

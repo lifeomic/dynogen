@@ -6,7 +6,6 @@ import {
 
 import { GeneratedFileConfig } from './GeneratedFile';
 import { ModuleBinding, parseModuleBindingString } from './util';
-import { Context } from './Context';
 import { File } from './File';
 
 export const DEFAULT_JSON_TO_TS_OPTIONS: Readonly<
@@ -76,7 +75,7 @@ export class Item {
     return property.type;
   }
 
-  async generate(context: Context): Promise<void> {
+  async generate(): Promise<File> {
     const ifaces = await Promise.all([
       this.generateInterface(),
       this.generateUninitializedInterface(),
@@ -84,7 +83,7 @@ export class Item {
     ]);
     const content = ifaces.map((s) => s.trim()).join('\n\n');
 
-    context.stageFile(new File(this.generatedFileConfig.outPath, content));
+    return new File(this.generatedFileConfig.outPath, content);
   }
 
   private generateGeneratedPartialInterface(): Promise<string> {
