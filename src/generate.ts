@@ -1,17 +1,16 @@
 import { Config } from './config';
 import { Mapper } from './Mapper';
-import { createContext } from './Context';
 import * as fs from 'fs-extra';
 import { File } from './File';
+import { flatten } from 'lodash';
 
 export async function generateFiles(config: Readonly<Config>): Promise<File[]> {
-  const context = createContext();
   const mappers = Object.entries(config.mappers).map(
     ([name, config]) => new Mapper(name, config)
   );
 
-  await Promise.all(mappers.map((mapper) => mapper.generate(context)));
-  return context.files;
+  const files = await Promise.all(mappers.map((mapper) => mapper.generate()));
+  return flatten(files);
 }
 
 export async function generate(config: Readonly<Config>): Promise<void> {

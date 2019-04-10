@@ -1,5 +1,4 @@
 import { MapperConfig, Mapper } from '../src';
-import { createContext } from '../src/Context';
 import { createMockMapperConfig } from './helpers/mapper';
 import { createMockItemConfig } from './helpers/item';
 
@@ -46,11 +45,9 @@ const fixtures: Fixture[] = [
 
 fixtures.forEach(({ title, name, config }) => {
   test(title, async () => {
-    const context = createContext();
-    const stageSpy = jest.spyOn(context, 'stageFile');
     const item = new Mapper(name, config);
-    await item.generate(context);
-    expect(stageSpy.mock.calls[1][0].content).toMatchSnapshot();
+    const file = await item.generate();
+    expect(file).toMatchSnapshot();
   });
 });
 
@@ -73,7 +70,7 @@ test('Throws when using union type for index key', async () => {
     })
   );
 
-  await expect(mapper.generate(createContext())).rejects.toThrow(
+  await expect(mapper.generate()).rejects.toThrow(
     'Union types are not currently supported as index keys'
   );
 });
