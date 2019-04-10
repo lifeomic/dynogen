@@ -1,4 +1,4 @@
 export interface GeneratedFileConfig {
-  outPath: string;
-  overwrite?: boolean;
+  readonly outPath: string;
+  readonly overwrite?: boolean;
 }
