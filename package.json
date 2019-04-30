@@ -5,20 +5,13 @@
   "author": "LifeOmic <development@lifeomic.com>",
   "license": "MIT",
   "main": "./dist/src/",
-  "module": "./dist/es6/src/",
-  "jsnext:main": "./dist/esnext/src/",
   "types": "./dist/src/index.d.ts",
   "scripts": {
-    "compile-src-cjs": "tsc --declaration --declarationDir ./dist -p tsconfig-src-cjs.json",
-    "compile-src-es6": "tsc -p tsconfig-src-es6.json",
-    "compile-src-esnext": "tsc -p tsconfig-src-esnext.json",
-    "precompile-src": "rm -rf ./dist",
-    "compile-src": "yarn compile-src-cjs && yarn compile-src-es6 && yarn compile-src-esnext",
     "lint": "tslint --format codeFrame --project tsconfig.json 'src/**/*.ts' 'test/**/*.ts'",
     "pretest": "yarn lint",
     "test": "jest --coverage",
-    "prebuild": "yarn test",
-    "build": "yarn compile-src"
+    "prebuild": "yarn test && rm -rf ./dist",
+    "build": "tsc --declaration --declarationDir ./dist -p tsconfig.json"
   },
   "repository": {
     "type": "git",
