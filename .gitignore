@@ -1,6 +1,8 @@
-/node_modules/
-/coverage/
-/dist/
-/example/node_modules/
-/.vscode/
-yarn-error.log
+**/node_modules/
+**/dist/
+**/coverage/
+**/.vscode/
+**/.idea/
+**/package.lock.json
+**/yarn-error.log
+.npmrc

@@ -1,10 +1,19 @@
 import * as path from 'path';
 import * as ejs from 'ejs';
+import * as joi from '@hapi/joi';
 import { JSONSchema4TypeName } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
 
-import { GeneratedFileConfig } from './GeneratedFile';
-import { Item, ItemConfig, DEFAULT_JSON_TO_TS_OPTIONS } from './Item';
+import {
+  GeneratedFileConfig,
+  GeneratedFileConfigSchema
+} from './GeneratedFile';
+import {
+  Item,
+  ItemConfig,
+  DEFAULT_JSON_TO_TS_OPTIONS,
+  ItemConfigSchema
+} from './Item';
 import { renderValueToString, getIndentPrefix } from './ast';
 import { resolvePath } from './util';
 import { File } from './File';
@@ -23,21 +32,53 @@ interface SecondaryIndex {
   nonKeyAttributes?: string[];
 }
 
+const SecondaryIndexSchema = joi
+  .object({
+    name: joi.string().required(),
+    projectionType: joi.string().required(),
+    nonKeyAttributes: joi.array().items(joi.string())
+  })
+  .unknown(false);
+
 interface GlobalSecondaryIndex extends SecondaryIndex {
   hashKey: string;
   rangeKey?: string;
 }
 
+const GlobalSecondaryIndexSchema = joi
+  .object({
+    hashKey: joi.string().required(),
+    rangeKey: joi.string()
+  })
+  .concat(SecondaryIndexSchema)
+  .unknown(false);
+
 interface LocalSecondaryIndex extends SecondaryIndex {
   rangeKey: string;
 }
 
-interface TableSchemaConfig {
+const LocalSecondaryIndexSchema = joi
+  .object({
+    rangeKey: joi.string().required()
+  })
+  .concat(SecondaryIndexSchema)
+  .unknown(false);
+
+interface TableSchemaConfigSchema {
   hashKey: string;
   rangeKey?: string;
   globalSecondaryIndexes?: GlobalSecondaryIndex[];
   localSecondaryIndexes?: LocalSecondaryIndex[];
 }
+
+const TableSchemaConfigSchema = joi
+  .object({
+    hashKey: joi.string().required(),
+    rangeKey: joi.string(),
+    globalSecondaryIndexes: joi.array().items(GlobalSecondaryIndexSchema),
+    localSecondaryIndexes: joi.array().items(LocalSecondaryIndexSchema)
+  })
+  .unknown(false);
 
 interface TableSchema {
   hashKey: string;
@@ -46,13 +87,26 @@ interface TableSchema {
   localSecondaryIndexes: LocalSecondaryIndex[];
 }
 
-export interface MapperMetadata extends TableSchemaConfig {
+export interface MapperMetadata extends TableSchemaConfigSchema {
   tableName: string;
 }
+
+const MapperMetadataSchema = joi.object({
+  tableName: joi.string().required()
+});
 
 export interface MapperConfig extends GeneratedFileConfig, MapperMetadata {
   item: ItemConfig;
 }
+
+export const MapperConfigSchema = joi
+  .object({
+    item: ItemConfigSchema.required()
+  })
+  .concat(MapperMetadataSchema)
+  .concat(TableSchemaConfigSchema)
+  .concat(GeneratedFileConfigSchema)
+  .unknown(false);
 
 export interface MapperRenderProps {
   name: string;
