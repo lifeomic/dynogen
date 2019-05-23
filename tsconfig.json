@@ -1,23 +1,19 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
-    "baseUrl": ".",
-    "outDir": "./dist",
-    "noUnusedLocals": true,
+    "importHelpers": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "target": "es5",
+    "lib": ["esnext"],
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "declaration": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "allowJs": false,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "target": "ES2015",
-    "pretty": true,
-    "inlineSourceMap": false,
-    "inlineSources": false,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*.ts", "typings/**/*.d.ts"]
+    "noUnusedLocals": true,
+    "noUnusedParameters": false
+  }
 }

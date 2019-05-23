@@ -1,10 +1,14 @@
+import * as joi from '@hapi/joi';
 import { JSONSchema4, JSONSchema4Type } from 'json-schema';
 import {
   compile,
   Options as JSONSchemaToTSOptions
 } from 'json-schema-to-typescript';
 
-import { GeneratedFileConfig } from './GeneratedFile';
+import {
+  GeneratedFileConfig,
+  GeneratedFileConfigSchema
+} from './GeneratedFile';
 import { ModuleBinding, parseModuleBindingString } from './util';
 import { File } from './File';
 
@@ -22,10 +26,30 @@ export interface JSONSchemaNamedObject extends JSONSchema4 {
   properties: Record<string, JSONSchema4 & { type: JSONSchema4Type }>;
 }
 
+const JSONSchemaNamedObjectSchema = joi.object({
+  name: joi.string().required(),
+  type: joi
+    .string()
+    .valid('object')
+    .required(),
+  required: joi.array().items(joi.string()),
+  properties: joi.object(),
+  additionalProperties: joi.bool()
+});
+
 export interface ItemConfig extends GeneratedFileConfig {
   schema: JSONSchemaNamedObject;
   defaultProviders?: Record<string, string>;
 }
+
+export const ItemConfigSchema = joi
+  .object()
+  .concat(GeneratedFileConfigSchema)
+  .keys({
+    schema: JSONSchemaNamedObjectSchema,
+    defaultProviders: joi.object().pattern(joi.string(), joi.string())
+  })
+  .unknown(false);
 
 export class Item {
   constructor({

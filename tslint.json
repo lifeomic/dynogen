@@ -1,7 +1,24 @@
 {
   "extends": "tslint-config-semistandard",
   "rules": {
+    "arrow-return-shorthand": true,
+    "interface-over-type-literal": true,
+    "space-before-function-paren": false,
+    "prefer-const": true,
+    "prefer-for-of": true,
+    "prefer-readonly": true,
+    "prefer-object-spread": true,
+    "prefer-while": true,
+    "no-implicit-dependencies": true,
+    "no-angle-bracket-type-assertion": true,
+    "no-consecutive-blank-lines": true,
+    "no-empty": true,
+    "no-arg": true,
+    "no-boolean-literal-compare": true,
     "no-unused-variable": false,
-    "space-before-function-paren": false
+    "no-for-in-array": true,
+    "no-floating-promises": true,
+    "no-debugger": true,
+    "no-console": true
   }
 }
