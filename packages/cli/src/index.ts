@@ -14,6 +14,7 @@ function cmd<T>(handler: (context: T) => Promise<void> | void) {
   };
 }
 
+// tslint:disable-next-line no-unused-expression
 yargs
   .scriptName('dynogen')
   .usage('dynogen <cmd> [args]')

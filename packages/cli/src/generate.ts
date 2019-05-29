@@ -16,6 +16,7 @@ async function getConfig(path: string) {
     if (err.code === 'ENOENT') {
       throw new Error(`config file "${path}" does not exist`);
     }
+    throw err;
   }
 }
 
