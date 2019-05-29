@@ -9,9 +9,9 @@
   "scripts": {
     "lint": "tslint --format codeFrame --project tsconfig.json 'src/**/*.ts' 'test/**/*.ts'",
     "pretest": "yarn lint",
-    "test": "jest --config ../../jest.config.js",
+    "test": "jest",
     "prebuild": "rm -rf ./dist",
-    "build": "tsc --declaration --outDir ./dist --declarationDir ./dist -p tsconfig.json"
+    "build": "tsc --declaration --outDir ./dist --declarationDir ./dist -p tsconfig.json && cp -a ./src/templates ./dist/templates"
   },
   "repository": {
     "type": "git",
