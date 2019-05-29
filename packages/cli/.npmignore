@@ -1,8 +1,6 @@
 /src/
-/templates/
 /test/
 /coverage/
-/example/
 tsconfig*
 prettier.config.js
 .editorconfig
