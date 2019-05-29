@@ -10,7 +10,7 @@
     "pretest": "yarn lint",
     "test": "jest",
     "prebuild": "rm -rf ./dist",
-    "build": "tsc --declaration --outDir ./dist --declarationDir ./dist -p tsconfig.json"
+    "build": "tsc --declaration --outDir ./dist --declarationDir ./dist -p tsconfig.json && chmod +x ./dist/index.js"
   },
   "repository": {
     "type": "git",
