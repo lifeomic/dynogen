@@ -3,8 +3,7 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "packages/utils/*",
-    "example"
+    "examples/*"
   ],
   "scripts": {
     "clean": "lerna clean --yes && rm -rf node_modules",
