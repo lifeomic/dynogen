@@ -9,7 +9,6 @@
     "prefer-readonly": true,
     "prefer-object-spread": true,
     "prefer-while": true,
-    "no-implicit-dependencies": true,
     "no-angle-bracket-type-assertion": true,
     "no-consecutive-blank-lines": true,
     "no-empty": true,
