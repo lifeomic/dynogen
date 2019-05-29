@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^3.12.1",
-    "with-tmp": "^1.1.1",
-    "yargs": "^13.2.4"
+    "@types/yargs": "^13.0.0",
+    "with-tmp": "^1.1.1"
   }
 }
