@@ -289,8 +289,10 @@ export class Mapper {
       ...this.tableSchema.globalSecondaryIndexes,
       ...this.tableSchema.localSecondaryIndexes
     ].map((index: SecondaryIndex) => index.name);
-    if (!names.length) return `type IndexName = never;`;
-    return `type IndexName = ${names.map((name) => `"${name}"`).join(' | ')};`;
+    const type = names.length
+      ? names.map((name) => `"${name}"`).join(' | ')
+      : 'never';
+    return `export type IndexName = ${type};`;
   }
 
   private renderItemSchemaValue() {

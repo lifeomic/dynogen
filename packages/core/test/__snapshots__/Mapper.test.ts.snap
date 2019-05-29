@@ -43,7 +43,7 @@ export interface UserKey {
 }
 
 
-type IndexName = never;
+export type IndexName = never;
 
 const ajv = new Ajv({
   allErrors: true
@@ -271,7 +271,7 @@ export interface UserKey {
 }
 
 
-type IndexName = \\"byLogin\\" | \\"byName\\";
+export type IndexName = \\"byLogin\\" | \\"byName\\";
 
 const ajv = new Ajv({
   allErrors: true
