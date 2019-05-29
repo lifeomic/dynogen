@@ -3,7 +3,7 @@
 exports[`Generates simple Mapper 1`] = `
 Array [
   File {
-    "content": "/* tslint-ignore */
+    "content": "/* tslint:disable */
 
 /**
  * This file was generated with Dynogen.
@@ -21,7 +21,7 @@ export type GeneratedPartialUser = {};",
     "path": "./User.ts",
   },
   File {
-    "content": "/* tslint-ignore */
+    "content": "/* tslint:disable */
 
 /**
  * This file was generated with Dynogen.
@@ -221,7 +221,7 @@ export class UserMapper {
 exports[`Generates simple Mapper 2`] = `
 Array [
   File {
-    "content": "/* tslint-ignore */
+    "content": "/* tslint:disable */
 
 /**
  * This file was generated with Dynogen.
@@ -246,7 +246,7 @@ export interface GeneratedPartialUser {
     "path": "./User.ts",
   },
   File {
-    "content": "/* tslint-ignore */
+    "content": "/* tslint:disable */
 
 /**
  * This file was generated with Dynogen.
