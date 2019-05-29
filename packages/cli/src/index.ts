@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import yargs = require('yargs');
 import { DEFAULT_DYNOGEN_CONFIG_PATH } from './constants';
 
