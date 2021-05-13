@@ -8,7 +8,7 @@ import * as path from 'path';
  */
 export function isRelativeOrAbsoluteRequire(path: string) {
   // node module regex
-  return !/^[a-z][a-z-_]+((\/)?.+)$/i.test(path);
+  return !/^[a-z][a-z-_]+(\/.+)?$/i.test(path);
 }
 
 const DEFAULT_MODULE_EXTS = ['.js', '.ts'];
